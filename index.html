@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="he" dir="rtl" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>דף נחיתה עם סרטון</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="w-full h-full overflow-auto">
+   <div class="min-h-full flex flex-col items-center justify-center px-6 py-12">
+    <div class="w-full max-w-4xl"><!-- כותרת -->
+     <h1 id="mainTitle" class="text-center mb-10"></h1><!-- מיכל הסרטון -->
+     <div class="w-full mb-8 rounded-2xl overflow-hidden shadow-2xl">
+      <div id="videoContainer" class="relative w-full" style="padding-bottom: 56.25%;"><iframe id="videoFrame" class="absolute top-0 left-0 w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen> </iframe>
+      </div>
+     </div><!-- תיאור -->
+     <div id="descriptionBox" class="rounded-xl p-8 shadow-lg">
+      <p id="description" class="leading-relaxed text-center"></p>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      main_title: "ברוכים הבאים לדף שלנו",
+      video_url: "",
+      description: "����ן תוכל להוסיף תיאור קצר על התוכן שבסרטון. ספר למבקרים מה הם עומדים לראות ומדוע זה חשוב.",
+      background_color: "#f0f4f8",
+      surface_color: "#ffffff",
+      text_color: "#1a202c",
+      primary_color: "#3b82f6",
+      accent_color: "#8b5cf6",
+      font_family: "Arial",
+      font_size: 16
+    };
+
+    async function onConfigChange(config) {
+      const bgColor = config.background_color || defaultConfig.background_color;
+      const surfaceColor = config.surface_color || defaultConfig.surface_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const primaryColor = config.primary_color || defaultConfig.primary_color;
+      const accentColor = config.accent_color || defaultConfig.accent_color;
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      const baseFontSize = config.font_size || defaultConfig.font_size;
+      
+      const mainTitle = config.main_title || defaultConfig.main_title;
+      const videoUrl = config.video_url || defaultConfig.video_url;
+      const description = config.description || defaultConfig.description;
+
+      // עדכון צבעים
+      document.getElementById('app').style.background = `linear-gradient(135deg, ${bgColor} 0%, ${primaryColor}15 100%)`;
+      document.getElementById('descriptionBox').style.backgroundColor = surfaceColor;
+      
+      // עדכון טקסטים וצבעי טקסט
+      const titleEl = document.getElementById('mainTitle');
+      titleEl.textContent = mainTitle;
+      titleEl.style.color = textColor;
+      titleEl.style.fontFamily = `${fontFamily}, Arial, sans-serif`;
+      titleEl.style.fontSize = `${baseFontSize * 2.5}px`;
+      titleEl.style.fontWeight = 'bold';
+      
+      const descEl = document.getElementById('description');
+      descEl.textContent = description;
+      descEl.style.color = textColor;
+      descEl.style.fontFamily = `${fontFamily}, Arial, sans-serif`;
+      descEl.style.fontSize = `${baseFontSize * 1.1}px`;
+      
+      // עדכון סרטון
+      const videoFrame = document.getElementById('videoFrame');
+      if (videoUrl && videoUrl.trim() !== '') {
+        videoFrame.src = videoUrl;
+        document.getElementById('videoContainer').style.display = 'block';
+      } else {
+        videoFrame.src = '';
+        document.getElementById('videoContainer').style.display = 'block';
+      }
+    }
+
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [
+          {
+            get: () => config.background_color || defaultConfig.background_color,
+            set: (value) => {
+              config.background_color = value;
+              window.elementSdk.setConfig({ background_color: value });
+            }
+          },
+          {
+            get: () => config.surface_color || defaultConfig.surface_color,
+            set: (value) => {
+              config.surface_color = value;
+              window.elementSdk.setConfig({ surface_color: value });
+            }
+          },
+          {
+            get: () => config.text_color || defaultConfig.text_color,
+            set: (value) => {
+              config.text_color = value;
+              window.elementSdk.setConfig({ text_color: value });
+            }
+          },
+          {
+            get: () => config.primary_color || defaultConfig.primary_color,
+            set: (value) => {
+              config.primary_color = value;
+              window.elementSdk.setConfig({ primary_color: value });
+            }
+          },
+          {
+            get: () => config.accent_color || defaultConfig.accent_color,
+            set: (value) => {
+              config.accent_color = value;
+              window.elementSdk.setConfig({ accent_color: value });
+            }
+          }
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => config.font_family || defaultConfig.font_family,
+          set: (value) => {
+            config.font_family = value;
+            window.elementSdk.setConfig({ font_family: value });
+          }
+        },
+        fontSizeable: {
+          get: () => config.font_size || defaultConfig.font_size,
+          set: (value) => {
+            config.font_size = value;
+            window.elementSdk.setConfig({ font_size: value });
+          }
+        }
+      };
+    }
+
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ["main_title", config.main_title || defaultConfig.main_title],
+        ["video_url", config.video_url || defaultConfig.video_url],
+        ["description", config.description || defaultConfig.description]
+      ]);
+    }
+
+    window.elementSdk.init({
+      defaultConfig,
+      onConfigChange,
+      mapToCapabilities,
+      mapToEditPanelValues
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b07a7ace2e7d0ed',t:'MTc2NjE1NTIyNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
